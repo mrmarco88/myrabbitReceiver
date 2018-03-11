@@ -3,6 +3,13 @@ package com.filelife.myrabbitReceiver;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.Seconds;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -17,7 +24,9 @@ public class RabbitmqReceiver implements AmqpReceiver {
 	public Channel createQueue() {
 		ConnectionFactory factory = new ConnectionFactory();
 		Channel channel = null;
-		factory.setHost("localhost");
+		factory.setHost("192.168.1.102");
+		factory.setUsername("blackdragonlap");
+		factory.setPassword("password");
 		Connection connection;
 		try {
 			connection = factory.newConnection();
@@ -42,7 +51,12 @@ public class RabbitmqReceiver implements AmqpReceiver {
 			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 					byte[] body) throws IOException {
 				String message = new String(body, "UTF-8");
-				System.out.println(" [x] Received '" + message + "'");
+				String[] splited = message.split("\\s+");
+				DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+				DateTime sendDate = formatter.parseDateTime(splited[3]);
+				long rtt= DateTime.now().getMillis()-sendDate.getMillis();
+				System.out.println(" [x] Received@ "+DateTime.now()+" '" + message + "' After "+rtt+" mills");
+				
 				
 			}
 		};
